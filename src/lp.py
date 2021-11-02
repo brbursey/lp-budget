@@ -79,16 +79,35 @@ class LP():
           return np.array(constraints).squeeze(axis=2)
 
      def get_stats(self, params):
+          # items = list(params.items())
+          # print(items)
+          # print("Your monthly income: " + str(items[0][1][0]))
+
+          # for i in range(1, len(self.result)):
+          #      print(f'{items[i][0]}: {self.result[i][0]}')
+
+          # print("====================")
+          # print('extra to budget: ' + str(items[0][1][0] - sum(self.result)[0]))
+          # print('total: ' + str(sum(self.result)[0]))
+          # print("====================")
+
+          # upper_bound = 0
+          # lower_bound = 0
+          # for i in range(1, len(items)):
+          #      upper_bound += items[i][1][1]
+          #      lower_bound += items[i][1][0]
+
+          # print('sum of lower ranges: ' + str(lower_bound))
+          # print('sum of upper ranges: ' + str(upper_bound))
+
+          categories: Dict[str, float] = {}
           items = list(params.items())
-          print("Your monthly income: " + str(items[0][1][0]))
+          categories[f'{items[0][0]}'] = items[0][1][0]
 
           for i in range(1, len(self.result)):
-               print(f'{items[i][0]}: {self.result[i]}')
-
-          print("====================")
-          print('extra to budget: ' + str(items[0][1][0] - sum(self.result)))
-          print('total: ' + str(sum(self.result)))
-          print("====================")
+               categories[f'{items[i][0]}'] = f'{float(self.result[i][0])}'
+          categories['extra'] = items[0][1][0] - sum(self.result)[0]
+          categories['total'] = sum(self.result)[0]
 
           upper_bound = 0
           lower_bound = 0
@@ -96,5 +115,10 @@ class LP():
                upper_bound += items[i][1][1]
                lower_bound += items[i][1][0]
 
-          print('sum of lower ranges: ' + str(lower_bound))
-          print('sum of upper ranges: ' + str(upper_bound))
+          categories["sum of lower"] = lower_bound
+          categories["sum of upper"] = upper_bound
+
+          print(categories)
+          return categories
+
+

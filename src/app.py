@@ -1,5 +1,6 @@
 from lp import LP
 from flask import Flask
+import json
 
 app = Flask(__name__)
 
@@ -26,8 +27,8 @@ def budget():
     }
     lp = LP(budget)
     results = lp.solve()
-    lp.get_stats(budget)
-    return ""
+    stats = lp.get_stats(budget)
+    return json.dumps(stats)
 
 
 if __name__ == "__main__":
