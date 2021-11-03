@@ -28,7 +28,7 @@ def budget():
     lp = LP(budget)
     results = lp.solve()
     stats = lp.get_stats(budget)
-    return json.dumps(stats)
+    return json.dumps([stat.__dict__ for stat in stats])
 
 
 if __name__ == "__main__":
@@ -37,3 +37,4 @@ if __name__ == "__main__":
 # TODO: setup config for this to be deployed
 # TODO: add code for discrete values (ex: subscriptions)
 # TODO: Look into Quadratic Programming for more complex items like loans (quadprog)
+# TODO: Create UI page

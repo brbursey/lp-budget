@@ -1,7 +1,8 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 import cvxpy as cp
 import numpy as np
 from numpy.core.fromnumeric import shape
+from models import Bucket, BudgetStat
 
 class LP():
 
@@ -79,35 +80,27 @@ class LP():
           return np.array(constraints).squeeze(axis=2)
 
      def get_stats(self, params):
-          # items = list(params.items())
-          # print(items)
-          # print("Your monthly income: " + str(items[0][1][0]))
-
-          # for i in range(1, len(self.result)):
-          #      print(f'{items[i][0]}: {self.result[i][0]}')
-
-          # print("====================")
-          # print('extra to budget: ' + str(items[0][1][0] - sum(self.result)[0]))
-          # print('total: ' + str(sum(self.result)[0]))
-          # print("====================")
-
-          # upper_bound = 0
-          # lower_bound = 0
-          # for i in range(1, len(items)):
-          #      upper_bound += items[i][1][1]
-          #      lower_bound += items[i][1][0]
-
-          # print('sum of lower ranges: ' + str(lower_bound))
-          # print('sum of upper ranges: ' + str(upper_bound))
-
-          categories: Dict[str, float] = {}
+          categories: List[Bucket] = []
           items = list(params.items())
-          categories[f'{items[0][0]}'] = items[0][1][0]
 
           for i in range(1, len(self.result)):
-               categories[f'{items[i][0]}'] = f'{float(self.result[i][0])}'
-          categories['extra'] = items[0][1][0] - sum(self.result)[0]
-          categories['total'] = sum(self.result)[0]
+               bucket = self.__get_values(items[i], self.result[i])
+               categories.append(bucket)
+
+          # this can be better since we dont know if income is always fist
+          # this is an assumption for testing
+          income: BudgetStat = BudgetStat(
+               name=items[0][0],
+               value=round(float(items[0][1][0]), 2),
+          )
+          extra: BudgetStat = BudgetStat(
+               name="extra",
+               value=round(items[0][1][0] - sum(self.result)[0], 2)
+          )
+          total: BudgetStat = BudgetStat(
+               name="total",
+               value= round(sum(self.result)[0], 2)
+          )
 
           upper_bound = 0
           lower_bound = 0
@@ -115,10 +108,25 @@ class LP():
                upper_bound += items[i][1][1]
                lower_bound += items[i][1][0]
 
-          categories["sum of lower"] = lower_bound
-          categories["sum of upper"] = upper_bound
+          sum_lower_bound: BudgetStat = BudgetStat(name="sum of lower", value=lower_bound)
+          sum_upper_bound: BudgetStat = BudgetStat(name="sum of upper", value=upper_bound)
 
-          print(categories)
+          categories.extend([income, extra, total, sum_lower_bound, sum_upper_bound])
+
           return categories
+
+     def __get_values(self, item, result):
+           bucket: Bucket = Bucket(
+                name=item[0],
+                result=round(float(result[0]), 2),
+                lower=round(float(item[1][0]), 2),
+                upper=round(float(item[1][1]), 2)
+           )
+
+           return bucket
+
+
+# TODO: Add bounds to json response
+# TODO: Consider another round of optimization for the "extra"
 
 
